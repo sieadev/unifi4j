@@ -4,6 +4,7 @@ import dev.siea.unifi4j.async.UnifiAction;
 import dev.siea.unifi4j.client.UnifiHttpClient;
 import dev.siea.unifi4j.model.device.AdoptDeviceRequest;
 import dev.siea.unifi4j.model.device.AdoptedDeviceAction;
+import dev.siea.unifi4j.model.device.Device;
 import dev.siea.unifi4j.model.device.DevicesQuery;
 import dev.siea.unifi4j.model.device.DevicesResponse;
 import dev.siea.unifi4j.model.device.PortAction;
@@ -15,6 +16,7 @@ import java.util.Map;
 public class DeviceService extends UnifiService {
 
     private static final String DEVICES_PATH_TEMPLATE = "sites/%s/devices";
+    private static final String DEVICE_DETAILS_PATH_TEMPLATE = "sites/%s/devices/%s";
     private static final String ADOPT_PATH_TEMPLATE = "sites/%s/devices/adopt";
     private static final String PORT_ACTION_PATH_TEMPLATE = "sites/%s/devices/%s/interfaces/ports/%s/actions";
     private static final String ADOPTED_DEVICE_ACTION_PATH_TEMPLATE = "sites/%s/devices/%s/actions";
@@ -38,6 +40,19 @@ public class DeviceService extends UnifiService {
             }
         }
         return client.getAsync(path, DevicesResponse.class);
+    }
+
+    /**
+     * Fetches details for a single adopted device.
+     *
+     * @param siteId   the site ID
+     * @param deviceId the adopted device ID
+     * @return the device details
+     * @see <a href="https://developer.ui.com/network/v10.1.84/getadopteddevicedetails">Get Adopted Device Details</a>
+     */
+    public UnifiAction<Device> getDevice(@NotNull String siteId, @NotNull String deviceId) {
+        String path = String.format(DEVICE_DETAILS_PATH_TEMPLATE, siteId, deviceId);
+        return client.getAsync(path, Device.class);
     }
 
     /**
