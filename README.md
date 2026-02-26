@@ -1,6 +1,6 @@
 # Unifi4J
 
-Java client for the **Unifi Network** API with a reactive-style API. Typed responses, optional insecure SSL for self-hosted controllers, and a simple service registry.
+Java client for the **Unifi Network** API with a reactive-style API. 
 
 **Requirements:** Java 21+
 
