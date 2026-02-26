@@ -1,4 +1,4 @@
-package dev.siea.unifi4j.model;
+package dev.siea.unifi4j.model.site;
 
 /**
  * Operators supported in sites filter expressions.

@@ -1,25 +1,24 @@
-package dev.siea.unifi4j.model;
+package dev.siea.unifi4j.model.site;
 
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Query parameters for the devices endpoint: pagination (offset, limit) and optional filter string.
+ * Query parameters for the sites endpoint: pagination (offset, limit) and optional filters.
  */
-public class DevicesQuery {
+public class SitesQuery {
 
     private final Integer offset;
     private final Integer limit;
-    private final String filter;
+    private final List<SiteFilter> filters;
 
-    private DevicesQuery(Integer offset, Integer limit, String filter) {
+    private SitesQuery(Integer offset, Integer limit, List<SiteFilter> filters) {
         this.offset = offset;
         this.limit = limit;
-        this.filter = filter;
+        this.filters = filters == null ? Collections.emptyList() : new ArrayList<>(filters);
     }
 
     public static Builder builder() {
@@ -35,8 +34,8 @@ public class DevicesQuery {
         if (limit != null) {
             params.add("limit=" + limit);
         }
-        if (filter != null && !filter.isBlank()) {
-            params.add("filter=" + URLEncoder.encode(filter, StandardCharsets.UTF_8));
+        for (SiteFilter filter : filters) {
+            params.add("filter=" + filter.toQueryValue());
         }
         if (params.isEmpty()) {
             return "";
@@ -52,15 +51,14 @@ public class DevicesQuery {
         return limit;
     }
 
-    @Nullable
-    public String getFilter() {
-        return filter;
+    public List<SiteFilter> getFilters() {
+        return Collections.unmodifiableList(filters);
     }
 
     public static final class Builder {
         private Integer offset;
         private Integer limit;
-        private String filter;
+        private final List<SiteFilter> filters = new ArrayList<>();
 
         public Builder offset(int offset) {
             this.offset = offset;
@@ -72,13 +70,17 @@ public class DevicesQuery {
             return this;
         }
 
-        public Builder filter(@Nullable String filter) {
-            this.filter = filter;
+        public Builder filter(@NotNull SiteFilter filter) {
+            this.filters.add(filter);
             return this;
         }
 
-        public DevicesQuery build() {
-            return new DevicesQuery(offset, limit, filter);
+        public Builder filter(@NotNull SiteFilterField field, @NotNull SiteFilterOperator operator, @NotNull String value) {
+            return filter(SiteFilter.of(field, operator, value));
+        }
+
+        public SitesQuery build() {
+            return new SitesQuery(offset, limit, filters);
         }
     }
 }

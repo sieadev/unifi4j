@@ -1,4 +1,4 @@
-package dev.siea.unifi4j.model;
+package dev.siea.unifi4j.model.device;
 
 /**
  * Supported actions for execute adopted device action API.

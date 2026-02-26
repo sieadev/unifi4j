@@ -1,4 +1,4 @@
-package dev.siea.unifi4j.model;
+package dev.siea.unifi4j.model.device;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 

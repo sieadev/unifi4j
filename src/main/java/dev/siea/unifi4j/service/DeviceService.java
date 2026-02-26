@@ -2,11 +2,11 @@ package dev.siea.unifi4j.service;
 
 import dev.siea.unifi4j.async.UnifiAction;
 import dev.siea.unifi4j.client.UnifiHttpClient;
-import dev.siea.unifi4j.model.AdoptDeviceRequest;
-import dev.siea.unifi4j.model.AdoptedDeviceAction;
-import dev.siea.unifi4j.model.DevicesQuery;
-import dev.siea.unifi4j.model.DevicesResponse;
-import dev.siea.unifi4j.model.PortAction;
+import dev.siea.unifi4j.model.device.AdoptDeviceRequest;
+import dev.siea.unifi4j.model.device.AdoptedDeviceAction;
+import dev.siea.unifi4j.model.device.DevicesQuery;
+import dev.siea.unifi4j.model.device.DevicesResponse;
+import dev.siea.unifi4j.model.device.PortAction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

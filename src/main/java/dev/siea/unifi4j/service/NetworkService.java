@@ -3,8 +3,8 @@ package dev.siea.unifi4j.service;
 import dev.siea.unifi4j.async.UnifiAction;
 import dev.siea.unifi4j.client.UnifiHttpClient;
 import dev.siea.unifi4j.model.NetworkInfo;
-import dev.siea.unifi4j.model.SitesQuery;
-import dev.siea.unifi4j.model.SitesResponse;
+import dev.siea.unifi4j.model.site.SitesQuery;
+import dev.siea.unifi4j.model.site.SitesResponse;
 import org.jetbrains.annotations.Nullable;
 
 public class NetworkService extends UnifiService {

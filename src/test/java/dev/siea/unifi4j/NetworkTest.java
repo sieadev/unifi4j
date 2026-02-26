@@ -1,8 +1,8 @@
 package dev.siea.unifi4j;
 
-import dev.siea.unifi4j.model.DevicesResponse;
-import dev.siea.unifi4j.model.Site;
-import dev.siea.unifi4j.model.SitesResponse;
+import dev.siea.unifi4j.model.device.DevicesResponse;
+import dev.siea.unifi4j.model.site.Site;
+import dev.siea.unifi4j.model.site.SitesResponse;
 import dev.siea.unifi4j.service.DeviceService;
 import dev.siea.unifi4j.service.NetworkService;
 import org.apache.log4j.LogManager;

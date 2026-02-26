@@ -1,4 +1,4 @@
-package dev.siea.unifi4j.model;
+package dev.siea.unifi4j.model.site;
 
 /**
  * Fields that can be used in a sites filter.
