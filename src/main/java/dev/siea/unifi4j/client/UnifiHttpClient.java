@@ -89,6 +89,62 @@ public class UnifiHttpClient {
         });
     }
 
+    /**
+     * POST the given path with JSON body and return the raw response body.
+     */
+    public UnifiAction<String> postAsync(String path, Object body) {
+        String bodyJson;
+        try {
+            bodyJson = body != null ? OBJECT_MAPPER.writeValueAsString(body) : "{}";
+        } catch (JsonProcessingException e) {
+            throw new CompletionException(e);
+        }
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + path))
+                .header("X-API-KEY", apiKey)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString(bodyJson))
+                .build();
+
+        CompletableFuture<String> future = httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> {
+                    int statusCode = response.statusCode();
+                    String responseBody = response.body();
+                    logger.debug("POST " + path + " responded with " + statusCode + ": " + responseBody);
+                    switch (statusCode) {
+                        case 200, 201:
+                            return responseBody;
+                        case 401, 403:
+                            throw new CompletionException(new AuthenticationException("Authentication failed: " + responseBody));
+                        case 429:
+                            throw new CompletionException(new RateLimitException("Rate limit exceeded: " + responseBody));
+                        default:
+                            throw new CompletionException(new ApiException("API error " + statusCode + ": " + responseBody));
+                    }
+                })
+                .exceptionally(ex -> {
+                    Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                    throw new CompletionException(new NetworkException("Network error while calling " + path, cause));
+                });
+        return new UnifiAction<>(future);
+    }
+
+    /**
+     * POST the given path with JSON body and deserialize the response into the given type.
+     */
+    public <T> UnifiAction<T> postAsync(String path, Object body, Class<T> responseType) {
+        return postAsync(path, body).thenApply(responseBody -> {
+            if (responseBody == null || responseBody.isBlank()) {
+                return null;
+            }
+            try {
+                return OBJECT_MAPPER.readValue(responseBody, responseType);
+            } catch (JsonProcessingException e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
     private HttpClient createInsecureClient() {
         try {
             TrustManager[] trustAllCerts = new TrustManager[]{
