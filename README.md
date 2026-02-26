@@ -1,14 +1,16 @@
-# Unifi4J
+# Unifi4J - Unifi for Java
 
-Java client for the **Unifi Network** API with a reactive-style API. 
+[![Documentation](https://img.shields.io/badge/docs-available-brightgreen)](https://docs.siea.dev/unifi4j/)
+
+Java client for the **Unifi Network** API with a reactive-style API.
 
 **Requirements:** Java 21+
 
----
+## About
+
+Unifi4J lets you talk to a Unifi Network controller from Java. You configure it with an API key and controller URL, then use services to call functions. All calls return `UnifiAction<T>` (backed by `CompletableFuture<T>`), so you can block with `.complete()`, use callbacks with `.queue()`, or chain async work with `.thenCompose()`. The client uses the official Unifi Network integration API and maps errors to typed exceptions (auth, rate limit, API, network). Full docs cover installation, configuration (including when to use insecure SSL), each service, and the reactive API.
 
 ## Installation
-
-Add the dependency to your project (Maven):
 
 ```xml
 <dependency>
@@ -17,116 +19,3 @@ Add the dependency to your project (Maven):
     <version>1.0-SNAPSHOT</version>
 </dependency>
 ```
-
-Or build from source:
-
-```bash
-mvn clean install
-```
-
----
-
-## Quick start
-
-```java
-Unifi4J unifi = Unifi4J.withApiKey("your-api-key")
-        .withBaseUri("https://192.168.1.1/")
-        .allowInsecureSsl(true)   // for self-signed / IP-based controllers
-        .build();
-
-// Blocking
-NetworkInfo info = unifi.network().getInfo().complete();
-System.out.println("Version: " + info.getApplicationVersion());
-
-// Async callback
-unifi.network().getSites().queue(
-    sites -> System.out.println("Sites: " + sites.getTotalCount()),
-    err -> System.err.println("Failed: " + err)
-);
-```
-
----
-
-## Configuration
-
-| Method | Description |
-|--------|-------------|
-| `withApiKey(String)` | API key (required). |
-| `withBaseUri(String)` | Base URL of the Unifi Network API (e.g. `https://192.168.1.1/`). |
-| `allowInsecureSsl(boolean)` | Accept self-signed certs and skip hostname verification (e.g. when using an IP). |
-
-You must call `build()` before using any service. The client checks connectivity to the API during `build()`.
-
----
-
-## Services
-
-Access services by type or via shortcuts:
-
-```java
-// By class (scales to many services)
-NetworkService network = unifi.getService(NetworkService.class);
-DeviceService device = unifi.getService(DeviceService.class);
-
-// Shortcuts
-NetworkService network = unifi.network();
-DeviceService device = unifi.device();
-```
-
-### Network service
-
-- **`getInfo()`** → `UnifiAction<NetworkInfo>` — application version.
-- **`getSites()`** → `UnifiAction<SitesResponse>` — all sites (default pagination).
-- **`getSites(SitesQuery query)`** — sites with offset, limit, and filters.
-
-```java
-// Pagination and filter
-SitesQuery query = SitesQuery.builder()
-        .offset(0)
-        .limit(20)
-        .filter(SiteFilterField.NAME, SiteFilterOperator.EQ, "Office")
-        .build();
-SitesResponse sites = unifi.network().getSites(query).complete();
-```
-
-### Device service
-
-- **`getDevices(String siteId)`** → `UnifiAction<DevicesResponse>` — all devices in the site.
-- **`getDevices(String siteId, DevicesQuery query)`** — with offset, limit, and filter.
-
-```java
-DevicesQuery query = DevicesQuery.builder()
-        .offset(0)
-        .limit(50)
-        .filter("state:eq:ONLINE")
-        .build();
-DevicesResponse devices = unifi.device().getDevices(siteId, query).complete();
-```
-
----
-
-## Reactive API
-
-All service methods return `UnifiAction<T>`, which wraps a `CompletableFuture<T>`:
-
-| Method | Description |
-|--------|-------------|
-| `complete()` | Block until done; throws `UnifiException` on failure. |
-| `queue(success, failure)` | Callback when done. |
-| `thenApply(fn)` | Transform the result. |
-| `thenCompose(fn)` | Chain another async action. |
-| `toFuture()` | Get the underlying `CompletableFuture<T>`. |
-
-```java
-// Chain async calls
-unifi.network().getSites()
-        .thenCompose(sites -> {
-            Site first = sites.getData().get(0);
-            return unifi.device().getDevices(first.getId().toString());
-        })
-        .queue(
-            devices -> System.out.println("Devices: " + devices.getTotalCount()),
-            Throwable::printStackTrace
-        );
-```
-
